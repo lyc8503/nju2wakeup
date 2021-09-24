@@ -14,7 +14,7 @@ Q: 为什么不直接适配 Wakeup 课表? A: 不会 Kotlin, 而且需要多次�
 
 ## 使用方法
 
-1. 下载一个 [Wakeup 课表](https://github.com/YZune/WakeupSchedule_Kotlin)
+1. 下载一个 [Wakeup 课表](https://github.com/YZune/WakeupSchedule_Kotlin).
 
 2. Releases 中下载运行本程序, 按照提示输入南大统一认证的用户名和密码.
 
