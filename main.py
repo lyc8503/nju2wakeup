@@ -15,19 +15,14 @@ coloredlogs.install()
 logging.basicConfig(format='%(asctime)s - %(name)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                     level=logging.INFO)
 
-auth = NjuUiaAuth()
-
 username = input("南大统一认证用户名: ")
 passwd = input("南大统一认证密码: ")
-
-
-if auth.needCaptcha(username):
-    logging.error("统一认证平台需要验证码, 原因是上一次登录尝试使用了错误的密码. 请手动登录一次后再运行本程序.")
-    sys.exit(-1)
+auth = NjuUiaAuth()
+captchaCode = auth.getCaptchaCode()
 
 logging.info("尝试登录账号...")
 
-if not auth.login(username, passwd):
+if not auth.login(username, passwd, captchaCode):
     logging.error("登录过程中发生错误!")
     sys.exit(-1)
 

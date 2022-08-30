@@ -13,6 +13,7 @@ import requests
 import re
 import os
 from io import BytesIO
+from PIL import Image
 
 URL_NJU_UIA_AUTH = 'https://authserver.nju.edu.cn/authserver/login'
 URL_NJU_ELITE_LOGIN = 'http://elite.nju.edu.cn/jiaowu/login.do'
@@ -45,13 +46,19 @@ class NjuUiaAuth:
     def getCaptchaCode(self):
         """
         DESCRIPTION:
-            Getting captcha code binded with IP
+            Getting captcha code using api: '/captcha.html?ts={a-three-digit}'
+            Require user's manual input
         RETURN_VALUE:
-            captcha code image(ByteIO). Recommended using Image.show() in PIL.
+            Captcha code entered by user
+            # captcha code image(ByteIO). Recommended using Image.show() in PIL.
         """
-        url = 'https://authserver.nju.edu.cn/authserver/captcha.html'
-        res = self.session.get(url, stream=True)
-        return BytesIO(res.content)
+        url = 'https://authserver.nju.edu.cn/authserver/captcha.html' + '?ts=' + str(random.randint(100, 999))
+        pic = self.session.get(url).content
+        im = Image.open(BytesIO(pic))
+        print("请输入验证码(随后请手动关闭图片): ")
+        im.show()
+        vcode = input()
+        return vcode
 
     def parsePassword(self, password):
         """
