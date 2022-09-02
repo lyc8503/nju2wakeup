@@ -6,6 +6,7 @@ import re
 import coloredlogs
 import logging
 import sys
+import webbrowser
 
 import requests
 
@@ -17,18 +18,19 @@ logging.basicConfig(format='%(asctime)s - %(name)s[line:%(lineno)d] - %(levelnam
 
 auth = NjuUiaAuth()
 
-username = input("南大统一认证用户名: ")
-passwd = input("南大统一认证密码: ")
+qrcode_url = auth.get_qrcode_url()
+print("请扫描给出链接中的二维码登录: " + qrcode_url)
+try:
+    webbrowser.open(qrcode_url)
+except:
+    pass
 
-
-if auth.needCaptcha(username):
-    logging.error("统一认证平台需要验证码, 原因是上一次登录尝试使用了错误的密码. 请手动登录一次后再运行本程序.")
-    sys.exit(-1)
-
-logging.info("尝试登录账号...")
-
-if not auth.login(username, passwd):
-    logging.error("登录过程中发生错误!")
+try:
+    if not auth.qrcode_login():
+        raise Exception("登录失败!")
+except Exception as e:
+    logging.exception(e)
+    input()
     sys.exit(-1)
 
 logging.info("登录成功!")
@@ -109,7 +111,9 @@ with open("export.wakeup_schedule", "w", encoding="utf-8") as f:
     f.write(
         '{"background":"","courseTextColor":-1,"id":1,"itemAlpha":60,"itemHeight":64,"itemTextSize":12,"maxWeek":' + str(
             last_week) + ',"nodes":11,"showOtherWeekCourse":true,"showSat":true,"showSun":true,"showTime":false,"startDate":"' + date.strftime(
-            '%Y-%m-%d') + '","strokeColor":-2130706433,"sundayFirst":false,"tableName":"\\u5357\\u5927' + str(term_name.encode("unicode_escape"))[2:-1].replace("\\\\", "\\") + '","textColor":-16777216,"timeTable":1,"type":0,"widgetCourseTextColor":-1,"widgetItemAlpha":60,"widgetItemHeight":64,"widgetItemTextSize":12,"widgetStrokeColor":-2130706433,"widgetTextColor":-16777216}\n')
+            '%Y-%m-%d') + '","strokeColor":-2130706433,"sundayFirst":false,"tableName":"\\u5357\\u5927' + str(
+            term_name.encode("unicode_escape"))[2:-1].replace("\\\\",
+                                                              "\\") + '","textColor":-16777216,"timeTable":1,"type":0,"widgetCourseTextColor":-1,"widgetItemAlpha":60,"widgetItemHeight":64,"widgetItemTextSize":12,"widgetStrokeColor":-2130706433,"widgetTextColor":-16777216}\n')
     # 课程信息
     logging.info("课程总数: " + str(len(courses_list)))
     colors = ["#ff" + ''.join([random.choice('0123456789abcdef') for j in range(6)])
@@ -119,7 +123,9 @@ with open("export.wakeup_schedule", "w", encoding="utf-8") as f:
     course_json = []
     cid = 0
     for j in courses_list:
-        course_json.append({"color": colors[cid], "courseName": courses_list[j]['name'], "credit": 0.0, "id": cid, "note": j, "tableId": 1})
+        course_json.append(
+            {"color": colors[cid], "courseName": courses_list[j]['name'], "credit": 0.0, "id": cid, "note": j,
+             "tableId": 1})
         courses_list[j]['cid'] = cid
         cid += 1
     f.write(json.dumps(course_json) + "\n")
@@ -159,4 +165,7 @@ r = requests.post("https://i.wakeup.fun/share_schedule", data={
 
 logging.info("上传完成: " + r.text)
 logging.info(">>>>>>>>>>请复制以下内容<<<<<<<<<<")
-logging.info("这是来自「WakeUp课程表」的课表分享，10分钟内有效哦，如果失效请朋友再分享一遍叭。为了保护隐私我们选择不监听你的剪贴板，请复制这条消息后，打开App的主界面，右上角第二个按钮 -> 从分享口令导入，按操作提示即可完成导入~分享口令为「" + r.json()['data'] + "」")
+logging.info(
+    "这是来自「WakeUp课程表」的课表分享，10分钟内有效哦，如果失效请朋友再分享一遍叭。为了保护隐私我们选择不监听你的剪贴板，请复制这条消息后，打开App的主界面，右上角第二个按钮 -> 从分享口令导入，按操作提示即可完成导入~分享口令为「" +
+    r.json()['data'] + "」")
+input()
