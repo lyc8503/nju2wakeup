@@ -85,19 +85,16 @@ for i in range(1, 30):
             course = r['d']['kclist'][i2][j]
             if not course:
                 continue
-            if len(course) > 1:
-                logging.warning("出现多节课时间重叠! 该课程不会被导入! 请退课后再次导入或手动添加.")
-                continue
-            course = course[0]
-            logging.info("课程: " + str(course))
-            if course['course_id'] not in courses_list:
-                courses_list[course['course_id']] = {'time': {}, 'name': course['course_name']}
-            if (course['weekday'], tuple(course['lessArr']), course['classroom'], course['teacher']) not in \
-                    courses_list[course['course_id']]['time']:
-                courses_list[course['course_id']]['time'][
-                    (course['weekday'], tuple(course['lessArr']), course['classroom'], course['teacher'])] = []
-            courses_list[course['course_id']]['time'][
-                (course['weekday'], tuple(course['lessArr']), course['classroom'], course['teacher'])].append(i)
+            for c in course:
+                logging.info("课程: " + str(c))
+                if c['course_id'] not in courses_list:
+                    courses_list[c['course_id']] = {'time': {}, 'name': c['course_name']}
+                if (c['weekday'], tuple(c['lessArr']), c['classroom'], c['teacher']) not in \
+                        courses_list[c['course_id']]['time']:
+                    courses_list[c['course_id']]['time'][
+                        (c['weekday'], tuple(c['lessArr']), c['classroom'], c['teacher'])] = []
+                courses_list[c['course_id']]['time'][
+                    (c['weekday'], tuple(c['lessArr']), c['classroom'], c['teacher'])].append(i)
 
 logging.info("所有课程: " + str(courses_list))
 
